@@ -2,6 +2,7 @@ const assert = require("assert")
 const { getWeb3, increaseTimestamp, deployVotingProcess } = require("../lib/util")
 
 const web3 = getWeb3()
+const Web3Utils = require("web3-utils")
 
 let accounts
 let instance
@@ -269,7 +270,7 @@ describe('VotingProcess', function () {
             assert.ok(result.events.ProcessCreated)
             assert.ok(result.events.ProcessCreated.returnValues)
             assert.equal(result.events.ProcessCreated.event, "ProcessCreated")
-            assert.equal(result.events.ProcessCreated.returnValues.entityAddress, entityAddress)
+            assert.equal(result.events.ProcessCreated.returnValues.entityId, Web3Utils.soliditySha3(entityAddress))
             assert.equal(result.events.ProcessCreated.returnValues.processId, expectedProcessId)
         })
 
@@ -455,6 +456,7 @@ describe('VotingProcess', function () {
             assert.ok(result2.events.ProcessCanceled)
             assert.ok(result2.events.ProcessCanceled.returnValues)
             assert.equal(result2.events.ProcessCanceled.event, "ProcessCanceled")
+            assert.equal(result2.events.ProcessCanceled.returnValues.entityId, Web3Utils.soliditySha3(entityAddress))
             assert.equal(result2.events.ProcessCanceled.returnValues.processId, processId1)
 
             const processData1 = await instance.methods.get(processId1).call()

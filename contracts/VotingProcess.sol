@@ -36,8 +36,8 @@ contract VotingProcess {
 
     event GenesisChanged(string genesis);
     event ChainIdChanged(uint chainId);
-    event ProcessCreated(address indexed entityAddress, bytes32 processId, string merkleTree);
-    event ProcessCanceled(address indexed entityAddress, bytes32 processId);
+    event ProcessCreated(bytes32 indexed entityId, bytes32 processId, string merkleTree);
+    event ProcessCanceled(bytes32 indexed entityId, bytes32 processId);
     event ValidatorAdded(string validatorPublicKey);
     event ValidatorRemoved(string validatorPublicKey);
     event OracleAdded(string oraclePublicKey);
@@ -140,7 +140,7 @@ contract VotingProcess {
         processesIndex[processId] = processes.length - 1;
         entityProcessCount[entityAddress]++;
 
-        emit ProcessCreated(entityAddress, processId, merkleTree);
+        emit ProcessCreated(keccak256(abi.encodePacked(entityAddress)), processId, merkleTree);
     }
 
     function get(bytes32 processId) public view returns (
@@ -172,7 +172,7 @@ contract VotingProcess {
 
         processes[processIndex].canceled = true;
 
-        emit ProcessCanceled(msg.sender, processId);
+        emit ProcessCanceled(keccak256(abi.encodePacked(msg.sender)), processId);
     }
 
     function addValidator(string memory validatorPublicKey) public onlyContractOwner()  {
