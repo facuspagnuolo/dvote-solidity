@@ -17,7 +17,7 @@ after(() => {
 // TEST SUITES
 describe('DVote Solidity', function () {
 
-    require("./entity-resolver")
+    require("./public-resolver")
     require("./voting-process")
 
 })
