@@ -1,4 +1,5 @@
-import { Wallet, providers, Contract, ContractFactory, ethers, utils as utils2 } from "ethers"
+import { Wallet, providers, Contract, ContractFactory, utils as utils2 } from "ethers"
+import { EnsPublicResolverContractMethods } from "../lib";
 
 const utils = require('web3-utils');
 const namehash = require('eth-ens-namehash');
@@ -34,7 +35,7 @@ async function deploy() {
     // ENS Public resolver
     const ensPublicResolverFactory = new ContractFactory(ENSPublicResolverAbi, ENSPublicResolverBytecode, wallet)
     const ensPublicResolverContract = await ensPublicResolverFactory.deploy(ensRegistryContract.address, deployOptions)
-    const ensPublicResolverInstance = await ensPublicResolverContract.deployed()
+    const ensPublicResolverInstance = await ensPublicResolverContract.deployed() as Contract & EnsPublicResolverContractMethods
     console.log("ENS PublicResolver deployed at", ensPublicResolverInstance.address)
 
     // Voting Process
@@ -110,6 +111,14 @@ async function deploy() {
     var tx8 = await ensPublicResolverInstance.functions["setAddr(bytes32,address)"](entityResolverVocdoniEthNode, ensPublicResolverInstance.address, deployOptions)
     await tx8.wait()
     console.log("'voting-process.vocdoni.eth' address", await ensPublicResolverInstance.addr(entityResolverVocdoniEthNode))
+
+    // Set the bootnode URL on the entity of Vocdoni
+    const BOOTNODES_KEY = "vnd.vocdoni.boot-nodes"
+    const entityId = utils2.keccak256(wallet.address)
+    const tx9 = await ensPublicResolverInstance.setText(entityId, BOOTNODES_KEY, "https://bootnodes.vocdoni.net/gateways.json")
+    await tx9.wait()
+
+    console.log("ENS Text of", entityId, BOOTNODES_KEY, "is", await ensPublicResolverInstance.text(entityId, BOOTNODES_KEY))
 
     // done
     console.log()
