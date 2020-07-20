@@ -80,9 +80,11 @@ contract PublicResolver is
         view
         override
         returns(bool) {
-        address owner = ens.owner(node);
-        if (owner == msg.sender || authorisations[node][owner][msg.sender]) {
-            return true;
+        if (address(ens) != address(0)) {
+            address owner = ens.owner(node);
+            if (owner == msg.sender || authorisations[node][owner][msg.sender]) {
+                return true;
+            }
         }
         return keccak256(abi.encodePacked(msg.sender)) == node;
     }
