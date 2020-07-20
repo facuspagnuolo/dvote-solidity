@@ -3,7 +3,7 @@ SHELL := /bin/bash
 
 .DEFAULT_GOAL := help
 SOLC=./node_modules/.bin/solcjs
-TSC=./node_modules/.bin/TSC
+TSC=./node_modules/.bin/tsc
 CONTRACT_SOURCES=$(wildcard contracts/*.sol contracts/registry/*.sol contracts/resolver/*.sol)
 ENS_REGISTRY_ARTIFACT_NAME=contracts_registry_ENSRegistry_sol_ENSRegistry
 ENS_PUBLIC_RESOLVER_ARTIFACT_NAME=contracts_resolver_PublicResolver_sol_PublicResolver
