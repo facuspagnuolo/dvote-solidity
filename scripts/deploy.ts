@@ -25,7 +25,6 @@ async function deploy() {
 
     // Deploy
     console.log("Deploying from", wallet.address, "\n")
-
     // ENS Registry
     const ensRegistryFactory = new ContractFactory(ENSRegistryAbi, ENSRegistryBytecode, wallet)
     const ensRegistryContract = await ensRegistryFactory.deploy(deployOptions)
@@ -106,11 +105,11 @@ async function deploy() {
     // console.log("Resolver", await ensRegistryInstance.resolver(votingProcessVocdoniEthNode))
     var tx7 = await ensPublicResolverInstance.functions["setAddr(bytes32,address)"](votingProcessVocdoniEthNode, votingProcessInstance.address, deployOptions)
     await tx7.wait()
-    console.log("'entity-resolver.vocdoni.eth' address", await ensPublicResolverInstance.addr(votingProcessVocdoniEthNode))
+    console.log("'entity-resolver.vocdoni.eth' address", await ensPublicResolverInstance.addr(entityResolverVocdoniEthNode))
 
     var tx8 = await ensPublicResolverInstance.functions["setAddr(bytes32,address)"](entityResolverVocdoniEthNode, ensPublicResolverInstance.address, deployOptions)
     await tx8.wait()
-    console.log("'voting-process.vocdoni.eth' address", await ensPublicResolverInstance.addr(entityResolverVocdoniEthNode))
+    console.log("'voting-process.vocdoni.eth' address", await ensPublicResolverInstance.addr(votingProcessVocdoniEthNode))
 
     // Set the bootnode URL on the entity of Vocdoni
     const BOOTNODES_KEY = "vnd.vocdoni.boot-nodes"
