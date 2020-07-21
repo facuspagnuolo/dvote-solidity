@@ -1,8 +1,8 @@
+import { BigNumber } from "@ethersproject/bignumber"
 import * as EntityResolver from "./entity-resolver.json"
 import * as VotingProcess from "./voting-process.json"
 
-import { ContractTransaction } from "ethers"
-import { BigNumber } from "ethers/utils"
+import { ContractTransaction } from "@ethersproject/contracts"
 
 ///////////////////////////////////////////////////////////////////////////////
 // SMART CONTRACTS ABI + BYTECODE

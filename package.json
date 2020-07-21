@@ -18,7 +18,7 @@
   "license": "ISC",
   "homepage": "https://gitlab.com/vocdoni/dvote-solidity#readme",
   "dependencies": {
-    "ethers": "^4.0.33"
+    "ethers": "^5.0.7"
   },
   "devDependencies": {
     "dotenv": "^7.0.0",
@@ -27,7 +27,7 @@
     "solc": "^0.5.7",
     "truffle-hdwallet-provider": "^1.0.14",
     "tslint": "^5.15.0",
-    "typescript": "^3.5.3",
+    "typescript": "^3.9.7",
     "web3": "1.0.0-beta.48",
     "web3-utils": "1.0.0-beta.48"
   }
