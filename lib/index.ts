@@ -2,7 +2,8 @@ import * as EnsRegistry from "./ens-registry.json"
 import * as EnsPublicResolver from "./ens-public-resolver.json"
 import * as VotingProcess from "./voting-process.json"
 
-import { ContractTransaction, utils } from "ethers"
+import { ContractTransaction } from "ethers"
+import { BigNumber } from "@ethersproject/bignumber"
 
 ///////////////////////////////////////////////////////////////////////////////
 // SMART CONTRACTS ABI + BYTECODE
@@ -14,9 +15,9 @@ export { VotingProcess }
 
 export type IMethodOverrides = {
     gasLimit?: number;
-    gasPrice?: utils.BigNumber;
+    gasPrice?: BigNumber;
     nonce?: number;
-    value?: utils.BigNumber;
+    value?: BigNumber;
     chainId?: number;
 };
 export declare const defaultMethodOverrides: IMethodOverrides;
@@ -27,16 +28,16 @@ export declare const defaultMethodOverrides: IMethodOverrides;
 
 /** Custom Smart Contract operations for an ENS Registry contract */
 export type EnsRegistryContractMethods = {
-    setRecord(node: string, owner: string, resolver: string, ttl: utils.BigNumber, overrides?: IMethodOverrides): Promise<ContractTransaction>,
-    setSubnodeRecord(node: string, label: string, owner: string, resolver: string, ttl: utils.BigNumber, overrides?: IMethodOverrides): Promise<ContractTransaction>,
+    setRecord(node: string, owner: string, resolver: string, ttl: BigNumber, overrides?: IMethodOverrides): Promise<ContractTransaction>,
+    setSubnodeRecord(node: string, label: string, owner: string, resolver: string, ttl: BigNumber, overrides?: IMethodOverrides): Promise<ContractTransaction>,
     setOwner(node: string, owner: string, overrides?: IMethodOverrides): Promise<ContractTransaction>,
     setSubnodeOwner(node: string, label: string, owner: string, overrides?: IMethodOverrides): Promise<ContractTransaction>,
     setResolver(node: string, resolver: string, overrides?: IMethodOverrides): Promise<ContractTransaction>,
-    setTTL(node: string, ttl: utils.BigNumber, overrides?: IMethodOverrides): Promise<ContractTransaction>,
+    setTTL(node: string, ttl: BigNumber, overrides?: IMethodOverrides): Promise<ContractTransaction>,
     setApprovalForAll(operator: string, approved: Boolean, overrides?: IMethodOverrides): Promise<ContractTransaction>,
     owner(node: string): Promise<string>,
     resolver(node: string): Promise<string>,
-    ttl(node: string): Promise<utils.BigNumber>,
+    ttl(node: string): Promise<BigNumber>,
     recordExists(node: string): Promise<boolean>,
     isApprovedForAll(_owner: string, operator: string): Promise<boolean>,
 }
@@ -77,13 +78,13 @@ export type ProcessType = "snark-vote" | "poll-vote" | "petition-sign" | "encryp
 /** Smart Contract operations for a Voting Process contract */
 export interface VotingProcessContractMethods {
     /** Retrieves the amount of voting processes that the entity has created */
-    getEntityProcessCount(entityAddress: string): Promise<utils.BigNumber>,
+    getEntityProcessCount(entityAddress: string): Promise<BigNumber>,
     /** Get the process ID that would be assigned to the next voting process */
     getNextProcessId(entityAddress: string): Promise<string>,
     /** Compute the process ID that corresponds to the given parameters */
     getProcessId(entityAddress: string, processCountIndex: number): Promise<string>,
     /** Get the windex within the global array where the given process is stored */
-    getProcessIndex(processId: string): Promise<utils.BigNumber>,
+    getProcessIndex(processId: string): Promise<BigNumber>,
     /** Update the genesis link and hash */
     setGenesis(genesisData: string, overrides?: IMethodOverrides): Promise<ContractTransaction>,
     /** Retrieve the current genesis block content link */
@@ -91,16 +92,16 @@ export interface VotingProcessContractMethods {
     /** Update the Chain ID */
     setChainId(newChainId: number, overrides?: IMethodOverrides): Promise<ContractTransaction>,
     /** Retrieve the current Chain ID */
-    getChainId(): Promise<utils.BigNumber>,
+    getChainId(): Promise<BigNumber>,
 
     /** Publish a new voting process using the given metadata link */
-    create(processType: ProcessType, metadata: string, censusMerkleRoot: string, censusMerkleTree: string, startBlock: number | utils.BigNumber, numberOfBlocks: number | utils.BigNumber, overrides?: IMethodOverrides): Promise<ContractTransaction>,
+    create(processType: ProcessType, metadata: string, censusMerkleRoot: string, censusMerkleTree: string, startBlock: number | BigNumber, numberOfBlocks: number | BigNumber, overrides?: IMethodOverrides): Promise<ContractTransaction>,
     /** Retrieve the current data for the given process */
-    get(processId: string): Promise<{ 
+    get(processId: string): Promise<{
         processType: ProcessType,
         entityAddress: string,
-        startBlock: utils.BigNumber,
-        numberOfBlocks: utils.BigNumber,
+        startBlock: BigNumber,
+        numberOfBlocks: BigNumber,
         metadata: string,
         censusMerkleRoot: string,
         censusMerkleTree: string,

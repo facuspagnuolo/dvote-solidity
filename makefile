@@ -87,6 +87,6 @@ build/index.js: build/ens-registry.json build/ens-public-resolver.json build/vot
 test: clean all
 	npm run test
 
-clean: 
+clean:
 	rm -Rf ./build
 	rm -Rf ./contracts/openzeppelin/*
