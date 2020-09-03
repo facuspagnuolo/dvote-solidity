@@ -4,11 +4,12 @@ import { EnsPublicResolverContractMethods } from "../lib";
 const utils = require('web3-utils');
 const namehash = require('eth-ens-namehash');
 
-require("dotenv").config()
+require("dotenv").config({ path: __dirname + "/.env" })
 
 const ENDPOINT = process.env.ENDPOINT
 const MNEMONIC = process.env.MNEMONIC
 const CHAIN_ID = process.env.CHAINID || 0
+const PRIV_KEY = process.env.PRIVKEY
 
 const PATH = "m/44'/60'/0'/0/0"
 
@@ -20,7 +21,12 @@ const { abi: VotingProcessAbi, bytecode: VotingProcessBytecode } = require("../b
 const deployOptions = { gasPrice: utils2.parseUnits("1", "gwei") }
 
 async function deploy() {
-    const provider = new providers.JsonRpcProvider(ENDPOINT, { chainId: 100, name: "xdai", ensAddress: "0x0000000000000000000000000000000000000000" })
+    const provider = new providers.JsonRpcProvider(ENDPOINT, { chainId: 77, name: "sokol", ensAddress: "0x0000000000000000000000000000000000000000" })
+    
+    // from priv key if you dont have a mnemonic
+    // const wallet = new Wallet(PRIV_KEY, provider)
+    
+    // from mnemonic
     const wallet = Wallet.fromMnemonic(MNEMONIC, PATH).connect(provider)
 
     // Deploy
@@ -80,6 +86,7 @@ async function deploy() {
 
     // check TLD added succesfully
     const entityResolverVocdoniEthNode = namehash.hash("entity-resolver.vocdoni.eth")
+    console.log("namehash of entity-resolver.vocdoni.eth is: ", entityResolverVocdoniEthNode)
     var entityResolverVocdoniEthOwner = await ensRegistryInstance.owner(entityResolverVocdoniEthNode)
     console.log("'entity-resolver.vocdoni.eth' owner", entityResolverVocdoniEthOwner)
 
@@ -90,6 +97,7 @@ async function deploy() {
 
     // check TLD added succesfully
     const votingProcessVocdoniEthNode = namehash.hash("voting-process.vocdoni.eth")
+    console.log("namehash of voting-process.vocdoni.eth is: ", votingProcessVocdoniEthNode)
     var votingProcessVocdoniEthOwner = await ensRegistryInstance.owner(votingProcessVocdoniEthNode)
     console.log("'voting-process.vocdoni.eth' owner", votingProcessVocdoniEthOwner)
 
@@ -105,19 +113,27 @@ async function deploy() {
     // console.log("Resolver", await ensRegistryInstance.resolver(votingProcessVocdoniEthNode))
     var tx7 = await ensPublicResolverInstance.functions["setAddr(bytes32,address)"](votingProcessVocdoniEthNode, votingProcessInstance.address, deployOptions)
     await tx7.wait()
-    console.log("'entity-resolver.vocdoni.eth' address", await ensPublicResolverInstance.addr(entityResolverVocdoniEthNode))
+    console.log("'voting-process.vocdoni.eth' address", await ensPublicResolverInstance.functions["addr(bytes32)"](votingProcessVocdoniEthNode))
+
 
     var tx8 = await ensPublicResolverInstance.functions["setAddr(bytes32,address)"](entityResolverVocdoniEthNode, ensPublicResolverInstance.address, deployOptions)
     await tx8.wait()
-    console.log("'voting-process.vocdoni.eth' address", await ensPublicResolverInstance.addr(votingProcessVocdoniEthNode))
+    console.log("'entity-resolver.vocdoni.eth' address", await ensPublicResolverInstance.functions["addr(bytes32)"](entityResolverVocdoniEthNode))
 
     // Set the bootnode URL on the entity of Vocdoni
     const BOOTNODES_KEY = "vnd.vocdoni.boot-nodes"
     const entityId = utils2.keccak256(wallet.address)
-    const tx9 = await ensPublicResolverInstance.setText(entityId, BOOTNODES_KEY, "https://bootnodes.vocdoni.net/gateways.json")
+    const tx9 = await ensPublicResolverInstance.functions["setText(bytes32,string,string)"](entityId, BOOTNODES_KEY, "https://bootnodes.vocdoni.net/gateways.json", deployOptions)
     await tx9.wait()
 
-    console.log("ENS Text of", entityId, BOOTNODES_KEY, "is", await ensPublicResolverInstance.text(entityId, BOOTNODES_KEY))
+    console.log("ENS Text of", entityId, BOOTNODES_KEY, "is", await ensPublicResolverInstance.functions["text(bytes32,string)"](entityId, BOOTNODES_KEY))
+
+    // Set the bootnode URL on the entity of Vocdoni
+    const META_KEY = "vnd.vocdoni.meta"
+    const tx10 = await ensPublicResolverInstance.functions["setText(bytes32,string,string)"](entityId, META_KEY, "ipfs://", deployOptions)
+    await tx10.wait()
+
+    console.log("ENS Text of", entityId, META_KEY, "is", await ensPublicResolverInstance.functions["text(bytes32,string)"](entityId, META_KEY))
 
     // done
     console.log()
