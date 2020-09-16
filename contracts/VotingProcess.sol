@@ -14,14 +14,14 @@ contract VotingProcess {
         string censusMerkleTree; // Content Hashed URI of the exported Merkle Tree (not including the public keys)
         string voteEncryptionPrivateKey; // Key published after the vote ends so that scrutiny can start
         bool canceled; // Can be used by organization to cancel the project
-        string results; // Content Hashed URI of the results (See Data Origins)
+        uint32[][] results; // [ question1:[option1,option2], question2:[option1,option2], ...]
     }
 
     // GLOBAL DATA
 
     address contractOwner;
     string[] validators; // Public key array
-    string[] oracles; // Public key array
+    address[] oracles; // Public key array
     string genesis; // Content Hashed URI
     uint256 chainId;
 
@@ -43,10 +43,10 @@ contract VotingProcess {
     event ProcessCanceled(address indexed entityAddress, bytes32 processId);
     event ValidatorAdded(string validatorPublicKey);
     event ValidatorRemoved(string validatorPublicKey);
-    event OracleAdded(string oraclePublicKey);
-    event OracleRemoved(string oraclePublicKey);
+    event OracleAdded(address oracleAddress);
+    event OracleRemoved(address oracleAddress);
     event PrivateKeyPublished(bytes32 indexed processId, string privateKey);
-    event ResultsPublished(bytes32 indexed processId, string results);
+    event ResultsPublished(bytes32 indexed processId, uint32[][] results);
 
     // MODIFIERS
 
@@ -58,6 +58,17 @@ contract VotingProcess {
         );
         _;
     }
+
+    modifier onlyOracle {
+        for (uint256 i = 0; i < oracles.length; i++) {
+            if (msg.sender == oracles[i]) {
+                _;
+                return;
+            }
+        }
+        revert("unauthorized");
+    }
+
 
     modifier onlyContractOwner() {
         require(msg.sender == contractOwner, "Only contract owner");
@@ -174,7 +185,7 @@ contract VotingProcess {
             censusMerkleTree: merkleTree,
             voteEncryptionPrivateKey: "",
             canceled: false,
-            results: ""
+            results: new uint32[][](0)
         });
 
         processes.push(process);
@@ -253,21 +264,21 @@ contract VotingProcess {
         return validators;
     }
 
-    function addOracle(string memory oraclePublicKey)
+    function addOracle(address oracleAddress)
         public
         onlyContractOwner()
     {
-        oracles.push(oraclePublicKey);
+        oracles.push(oracleAddress);
 
-        emit OracleAdded(oraclePublicKey);
+        emit OracleAdded(oracleAddress);
     }
 
-    function removeOracle(uint256 idx, string memory oraclePublicKey)
+    function removeOracle(uint256 idx, address oracleAddress)
         public
         onlyContractOwner()
     {
         require(
-            equalStrings(oracles[idx], oraclePublicKey),
+            oracles[idx] == oracleAddress,
             "Oracle to remove does not match index"
         );
 
@@ -275,16 +286,16 @@ contract VotingProcess {
         oracles[idx] = oracles[oracles.length - 1];
         oracles.pop();
 
-        emit OracleRemoved(oraclePublicKey);
+        emit OracleRemoved(oracleAddress);
     }
 
-    function getOracles() public view returns (string[] memory) {
+    function getOracles() public view returns (address[] memory) {
         return oracles;
     }
 
     function publishPrivateKey(bytes32 processId, string memory privateKey)
         public
-        onlyEntity(processId)
+        onlyOracle()
     {
         uint256 processIndex = getProcessIndex(processId);
         require(
@@ -306,23 +317,15 @@ contract VotingProcess {
         privateKey = processes[processIndex].voteEncryptionPrivateKey;
     }
 
-    function publishResults(bytes32 processId, string memory results)
+    function publishResults(bytes32 processId, uint32[][] memory results)
         public
-        onlyEntity(processId)
+        onlyOracle()
     {
         uint256 processIndex = getProcessIndex(processId);
         require(
             processes[processIndex].canceled == false,
             "Process must not be canceled"
         );
-        require(
-            equalStrings(
-                processes[processIndex].voteEncryptionPrivateKey,
-                ""
-            ) == false,
-            "The private key has not been revealed yet"
-        );
-
         processes[processIndex].results = results;
 
         emit ResultsPublished(processId, results);
@@ -331,7 +334,7 @@ contract VotingProcess {
     function getResults(bytes32 processId)
         public
         view
-        returns (string memory results)
+        returns (uint32[][] memory results)
     {
         uint256 processIndex = getProcessIndex(processId);
         results = processes[processIndex].results;
