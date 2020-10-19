@@ -33,7 +33,7 @@ interface IProcessStore {
         uint16[3] memory maxTotalCost_costExponent_namespace
     );
     function getParamsSignature(bytes32 processId) external view returns (bytes32);
-    function getResults(bytes32 processId) external view returns (string memory);
+    function getResults(bytes32 processId) external view returns (uint32[][] memory);
     function getCreationInstance(bytes32 processId) external view returns (address);
 
     // SET
@@ -51,7 +51,7 @@ interface IProcessStore {
     function setStatus(bytes32 processId, Status newStatus) external;
     function incrementQuestionIndex(bytes32 processId) external;
     function setCensus(bytes32 processId, string memory censusMerkleRoot, string memory censusMerkleTree) external;
-    function setResults(bytes32 processId, string memory results) external;
+    function setResults(bytes32 processId, uint32[][] memory results) external;
 
     // EVENTS
     event Activated(uint blockNumber);

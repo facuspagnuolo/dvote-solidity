@@ -94,7 +94,7 @@ contract ProcessBeta7 is IProcessStore {
         // Indirectly, it will also determine the Vochain that hosts this process.
         uint16 namespace;
         bytes32 paramsSignature; // entity.sign({...}) // fields that the oracle uses to authentify process creation
-        string results; // string containing the results
+        uint32[][] results; // Appearence count for every question and option value
     }
 
     /// @notice An entry for each process created by an Entity.
@@ -325,7 +325,7 @@ contract ProcessBeta7 is IProcessStore {
         public
         override
         view
-        returns (string memory)
+        returns (uint32[][] memory)
     {
         if (processes[processId].entityAddress == address(0x0)) {
             // Not found locally
@@ -458,7 +458,6 @@ contract ProcessBeta7 is IProcessStore {
         processData.costExponent = maxTotalCost_costExponent[1];
         processData.namespace = namespace;
         processData.paramsSignature = paramsSignature;
-        // newProcess.results = "";
 
         emit NewProcess(processId, namespace);
     }
@@ -601,11 +600,11 @@ contract ProcessBeta7 is IProcessStore {
         emit CensusUpdated(processId, processes[processId].namespace);
     }
 
-    function setResults(bytes32 processId, string memory results)
+    function setResults(bytes32 processId, uint32[][] memory results)
         public
         override
     {
-        require(bytes(results).length > 0, "No results");
+        require(results.length > 0, "No results");
 
         if (processes[processId].entityAddress == address(0x0)) {
             // Not found locally

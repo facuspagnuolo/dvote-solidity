@@ -301,10 +301,10 @@ export interface ProcessContractMethods {
      * ]```
      */
     get(processId: string): Promise<IProcessStateTuple>,
-    /** Retrieve the available results for the given process */
+    /** Retrieve the signature of the process parameters for the given process */
     getParamsSignature(processId: string): Promise<{ paramsSignature: string }>
     /** Retrieve the available results for the given process */
-    getResults(processId: string): Promise<{ results: string }>
+    getResults(processId: string): Promise<{ results: number[][] }>
     /** Gets the address of the process instance where the given processId was originally created. 
      * This allows to know where to send update transactions, after a fork has occurred. */
     getCreationInstance(processId): Promise<string>,
@@ -343,7 +343,7 @@ export interface ProcessContractMethods {
     /** Updates the census of the given process (only if the mode allows dynamic census) */
     setCensus(processId: string, censusMerkleRoot: string, censusMerkleTree: string): Promise<ContractTransaction>,
     /** Sets the given results for the given process */
-    setResults(processId: string, results: string): Promise<ContractTransaction>,
+    setResults(processId: string, results: number[][]): Promise<ContractTransaction>,
 }
 
 /** Wraps and unwraps the parameters sent to `Process.newProcess()` and obtained from `Process.get()` for convenience */
@@ -367,7 +367,7 @@ export class ProcessContractParameters {
     costExponent: number;
     namespace: number;
     paramsSignature?: string;
-    results?: string;
+    results?: number[][];
 
     /** Parse a plain parameters object  */
     static fromParams(params: IProcessCreateParams): ProcessContractParameters {
