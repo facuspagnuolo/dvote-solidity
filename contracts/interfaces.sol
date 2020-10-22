@@ -20,8 +20,16 @@ interface IProcessStore {
     
     enum Status {READY, ENDED, CANCELED, PAUSED, RESULTS}
 
+    struct ProcessResults {
+        uint32[][] tally;     // apperence count for every question and option value
+        uint32 height;        // total number of votes of the process
+        bytes32[] signatures; // signatures agreeing on the results published
+        bytes[] proofs;       // proofs for verifing the results published
+    }
+
     modifier onlyContractOwner virtual;
     modifier onlyIfActive virtual;
+    modifier onlyOracle(bytes32 processId) virtual;
 
     // GET
     function getEntityProcessCount(address entityAddress) external view returns (uint256);
@@ -41,7 +49,7 @@ interface IProcessStore {
         uint16[3] memory maxTotalCost_costExponent_namespace
     );
     function getParamsSignature(bytes32 processId) external view returns (bytes32);
-    function getResults(bytes32 processId) external view returns (string memory);
+    function getResults(bytes32 processId) external view returns (ProcessResults memory results);
     function getCreationInstance(bytes32 processId) external view returns (address);
 
     // SET
@@ -59,7 +67,9 @@ interface IProcessStore {
     function setStatus(bytes32 processId, Status newStatus) external;
     function incrementQuestionIndex(bytes32 processId) external;
     function setCensus(bytes32 processId, string memory censusMerkleRoot, string memory censusMerkleTree) external;
-    function setResults(bytes32 processId, string memory results) external;
+    function setResults(bytes32 processId, uint32[][] memory tally, uint32 height, bytes32 signature, bytes memory proof) external;
+    function addResultsSignature(bytes32 processId, bytes32 signature) external;
+    function addResultsProof(bytes32 processId, bytes memory proof) external;
 
     // EVENTS
     event Activated(uint blockNumber);
@@ -73,6 +83,8 @@ interface IProcessStore {
     );
     event CensusUpdated(bytes32 processId, uint16 namespace);
     event ResultsAvailable(bytes32 processId);
+    event ResultsSignatureAdded(bytes32 processId, address oracle);
+    event ResultsProofAdded(bytes32 processId, address oracle);
 }
 
 /// @notice The `INamespaceStore` interface defines the standard methods that allow querying and updating the details of each namespace.

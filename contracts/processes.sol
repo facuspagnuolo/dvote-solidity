@@ -94,7 +94,7 @@ contract Processes is IProcessStore {
         // Indirectly, it will also determine the Vochain that hosts this process.
         uint16 namespace;
         bytes32 paramsSignature; // entity.sign({...}) // fields that the oracle uses to authentify process creation
-        string results; // string containing the results
+        ProcessResults results; // results wraps the tally, the total number of votes, a list of signatures and a list of proofs
     }
 
     /// @notice An entry for each process created by an Entity.
@@ -122,6 +122,17 @@ contract Processes is IProcessStore {
         require(
             activationBlock > 0 && successorAddress == address(0),
             "Inactive"
+        );
+        _;
+    }
+
+    /// @notice Fails if the msg.sender is not an authorired oracle
+    modifier onlyOracle(bytes32 processId) override {
+         // Only an Oracle within the process' namespace is valid
+        INamespaceStore namespace = INamespaceStore(namespaceAddress);
+        require(
+            namespace.isOracle(processes[processId].namespace, msg.sender),
+            "Not oracle"
         );
         _;
     }
@@ -325,7 +336,7 @@ contract Processes is IProcessStore {
         public
         override
         view
-        returns (string memory)
+        returns (ProcessResults memory results)
     {
         if (processes[processId].entityAddress == address(0x0)) {
             // Not found locally
@@ -458,8 +469,13 @@ contract Processes is IProcessStore {
         processData.costExponent = maxTotalCost_costExponent[1];
         processData.namespace = namespace;
         processData.paramsSignature = paramsSignature;
-        // newProcess.results = "";
 
+        ProcessResults storage processResults;
+        // tally number of questions is questionCount
+        uint32[][] memory tally = new uint32[][](processData.questionCount); 
+        processResults.tally = tally;
+        processData.results = processResults;
+        
         emit NewProcess(processId, namespace);
     }
 
@@ -601,11 +617,13 @@ contract Processes is IProcessStore {
         emit CensusUpdated(processId, processes[processId].namespace);
     }
 
-    function setResults(bytes32 processId, string memory results)
+    function setResults(bytes32 processId, uint32[][] memory tally, uint32 height, bytes32 signature, bytes memory proof)
         public
         override
+        onlyOracle(processId)
     {
-        require(bytes(results).length > 0, "No results");
+        require(tally.length > 0, "No tally");
+        require(height > 0, "No votes");
 
         if (processes[processId].entityAddress == address(0x0)) {
             // Not found locally
@@ -613,12 +631,6 @@ contract Processes is IProcessStore {
             revert("Not found: Try on predecessor");
         }
 
-        // Only an Oracle within the process' namespace can set any results
-        INamespaceStore namespace = INamespaceStore(namespaceAddress);
-        require(
-            namespace.isOracle(processes[processId].namespace, msg.sender),
-            "Not oracle"
-        );
         // cannot publish results on a canceled process or on a process
         // that already has results
         require(
@@ -627,9 +639,49 @@ contract Processes is IProcessStore {
             "Canceled or already set"
         );
 
+        ProcessResults storage results;
+        results.tally = tally;
+        results.height = height;
+        if (signature != 0) {
+            results.signatures.push(signature);
+        }
+        if (proof.length != 0) {
+            results.proofs.push(proof);
+        }
         processes[processId].results = results;
         processes[processId].status = Status.RESULTS;
 
         emit ResultsAvailable(processId);
+    }
+
+    function addResultsSignature(bytes32 processId, bytes32 signature)
+        public
+        override
+        onlyOracle(processId)
+    {
+        // can only publish when process has results
+        require(
+            processes[processId].status == Status.RESULTS,
+            "Results not published"
+        );
+        processes[processId].results.signatures.push(signature);
+
+        emit ResultsSignatureAdded(processId, msg.sender);
+    }
+
+    function addResultsProof(bytes32 processId, bytes memory proof)
+        public
+        override
+        onlyOracle(processId)
+    {
+        // can only publish when process has results
+        require(
+            processes[processId].status == Status.RESULTS,
+            "Results not published"
+        );
+
+        processes[processId].results.proofs.push(proof);
+
+        emit ResultsProofAdded(processId, msg.sender);
     }
 }
