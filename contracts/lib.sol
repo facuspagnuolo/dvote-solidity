@@ -59,6 +59,11 @@ library ContractSupport {
     }
 }
 
+library ChainId {
+    function getChainId() external pure returns (uint256 id) {
+        assembly { id := chainid() }
+    }
+}
 
 library TrieProofs {
     using RLPReader for RLPReader.RLPItem;

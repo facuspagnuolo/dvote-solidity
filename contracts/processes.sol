@@ -172,7 +172,7 @@ contract Processes is IProcessStore, Chained {
     ) public override pure returns (bytes32) {
         return
             keccak256(
-                abi.encodePacked(entityAddress, processCountIndex, namespace)
+                abi.encodePacked(entityAddress, ChainId.getChainId(), processCountIndex, namespace)
             );
     }
 
