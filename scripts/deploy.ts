@@ -12,7 +12,7 @@ const ENS_GLOBAL_REGISTRY = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"
 const ENS_GLOBAL_PUBLIC_RESOLVER = "0x4B1488B7a6B320d2D721406204aBc3eeAa9AD329"
 
 const { abi: ENSRegistryAbi, bytecode: ENSRegistryBytecode } = require("../build/ens-registry.json")
-const { abi: ENSPublicResolverAbi, bytecode: ENSPublicResolverBytecode } = require("../build/ens-public-resolver.json")
+const { abi: ENSPublicResolverAbi, bytecode: ENSPublicResolverBytecode } = require("../build/ens-resolver.json")
 const { abi: VotingProcessAbi, bytecode: VotingProcessBytecode } = require("../build/processes.json")
 const { abi: tokenStorageProofAbi, bytecode: tokenStorageProofBytecode } = require("../build/token-storage-proof.json")
 const { abi: namespaceAbi, bytecode: namespaceByteCode } = require("../build/namespaces.json")
