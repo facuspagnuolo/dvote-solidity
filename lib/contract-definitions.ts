@@ -64,7 +64,7 @@ interface ProcessMethods {
     /** Get the process ID that would be assigned to the next process */
     getNextProcessId(entityAddress: string, namespace: number): Promise<string>,
     /** Compute the process ID that corresponds to the given parameters */
-    getProcessId(entityAddress: string, processCountIndex: number, namespace: number, chainId: number | BigNumber): Promise<string>,
+    getProcessId(entityAddress: string, processCountIndex: number, namespace: number, ethChainId: number | BigNumber): Promise<string>,
 
     // GLOBAL VARIABLES
 
@@ -102,9 +102,6 @@ interface ProcessMethods {
     getCreationInstance(processId): Promise<string>,
 
     // GLOBAL METHODS
-
-    /** Updates the address of the contract holding the details of the active namespaces */
-    setNamespaceAddress(namespaceAddr: string, overrides?: IMethodOverrides): Promise<ContractTransaction>,
 
     // PER-PROCESS METHODS
 
